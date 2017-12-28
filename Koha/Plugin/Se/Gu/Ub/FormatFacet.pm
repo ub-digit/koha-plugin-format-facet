@@ -24,7 +24,7 @@ use Koha::BiblioUtils;
 use Switch;
 
 ## Here we set our plugin version
-our $VERSION = "1.0.0";
+our $VERSION = "1.1.0";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
@@ -86,12 +86,12 @@ sub update_index_before {
             case 'ass' { $format = 'ejournal'; }
             case 'g  ' { $format = 'movie'; }
             case 'j  ' { $format = 'musicrecording'; }
-            case 'i  ' { $format = 'soundrecording'; }
+            case 'i  ' { $format = 'otherrecording'; }
             case 'cm ' { $format = 'notatedmusic'; }
             case 'dm ' { $format = 'notatedmusic'; }
             case 'ai ' { $format = 'database'; }
             case 'ki ' { $format = 'database'; }
-            case 'm  ' { $format = 'computergame'; }
+            case 'm  ' { $format = 'eresource'; }
             else { $format = 'other'; }
         }
 
