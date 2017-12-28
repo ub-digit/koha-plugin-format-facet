@@ -24,14 +24,14 @@ use Koha::BiblioUtils;
 use Switch;
 
 ## Here we set our plugin version
-our $VERSION = "0.0.2";
+our $VERSION = "1.0.0";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
     name            => 'Format Facet Plugin',
     author          => 'Johan Andersson von Geijer',
     date_authored   => '2017-11-07',
-    date_updated    => "2017-12-04",
+    date_updated    => "2017-12-28",
     minimum_version => '17.06.00.028',
     maximum_version => undef,
     version         => $VERSION,
@@ -69,51 +69,49 @@ sub update_index_before {
         my $format = '';
 
         switch ($format_footprint) {
-            case 'aa ' { $format = 'book'; print "Bok\n"; }
-            case 'aao' { $format = 'ebook'; print "E-bok\n"; }
-            case 'aas' { $format = 'ebook'; print "E-bok\n"; }
-            case 'ac ' { $format = 'book'; print "Bok\n"; }
-            case 'aco' { $format = 'ebook'; print "E-bok\n"; }
-            case 'acs' { $format = 'ebook'; print "E-bok\n"; }
-            case 'ad ' { $format = 'book'; print "Bok\n"; }
-            case 'ado' { $format = 'ebook'; print "E-bok\n"; }
-            case 'ads' { $format = 'ebook'; print "E-bok\n"; }
-            case 'am ' { $format = 'book'; print "Bok\n"; }
-            case 'amo' { $format = 'ebook'; print "E-bok\n"; }
-            case 'ams' { $format = 'ebook'; print "E-bok\n"; }
-            case 'as ' { $format = 'journal'; print "Tidskrift\n"; }
-            case 'aso' { $format = 'ejournal'; print "E-tidskrift\n"; }
-            case 'ass' { $format = 'ejournal'; print "E-tidskrift\n"; }
-            case 'g  ' { $format = 'movie'; print "Film/video\n"; }
-            case 'j  ' { $format = 'musicrecording'; print "Musikinspelning\n"; }
-            case 'i  ' { $format = 'soundrecording'; print "Inspelning övrig\n"; }
-            case 'cm ' { $format = 'notatedmusic'; print "Musiktryck (noter)\n"; }
-            case 'dm ' { $format = 'notatedmusic'; print "Musiktryck (noter)\n"; }
-            case 'ai ' { $format = 'database'; print "Databas\n" if is_dbas($record); }
-            case 'ki ' { $format = 'database'; print "Databas\n" if is_dbas($record); }
-            case 'm  ' { $format = 'computergame'; print "Elektronisk resurs\n"; }
-            else { $format = 'other'; print "Unhandled format!\n"; }
+            case 'aa ' { $format = 'book'; }
+            case 'aao' { $format = 'ebook'; }
+            case 'aas' { $format = 'ebook'; }
+            case 'ac ' { $format = 'book'; }
+            case 'aco' { $format = 'ebook'; }
+            case 'acs' { $format = 'ebook'; }
+            case 'ad ' { $format = 'book'; }
+            case 'ado' { $format = 'ebook'; }
+            case 'ads' { $format = 'ebook'; }
+            case 'am ' { $format = 'book'; }
+            case 'amo' { $format = 'ebook'; }
+            case 'ams' { $format = 'ebook'; }
+            case 'as ' { $format = 'journal'; }
+            case 'aso' { $format = 'ejournal'; }
+            case 'ass' { $format = 'ejournal'; }
+            case 'g  ' { $format = 'movie'; }
+            case 'j  ' { $format = 'musicrecording'; }
+            case 'i  ' { $format = 'soundrecording'; }
+            case 'cm ' { $format = 'notatedmusic'; }
+            case 'dm ' { $format = 'notatedmusic'; }
+            case 'ai ' { $format = 'database'; }
+            case 'ki ' { $format = 'database'; }
+            case 'm  ' { $format = 'computergame'; }
+            else { $format = 'other'; }
         }
 
         my $marc_field =  $self->retrieve_data('marc_field');
         my $marc_subfield =  $self->retrieve_data('marc_subfield');
 
         if (defined $record->subfield($marc_field, $marc_subfield)) {
-            print "998 is Allready there!";
+            #print "Skip since marc field $marc_field#$marc_subfield allready exists!\n";
         } else {
+            #print "Using marc field $marc_field#$marc_subfield!\n";
             my $before_field = $record->field('999');
             my $new_field = MARC::Field->new($marc_field,'','',$marc_subfield => "$format");
             $record->insert_fields_before($before_field,$new_field);
         }
-
-        print "Format: [$format] Footprint: [$format_footprint]\n";
-        print "================\n";
     }
 
-    use Data::Dumper;
-    open(DEBUG, '>/var/tmp/format_facet.log');
-    print DEBUG Dumper($args);
-    close(DEBUG);
+    # use Data::Dumper;
+    # open(DEBUG, '>/var/tmp/format_facet.log');
+    # print DEBUG Dumper($args);
+    # close(DEBUG);
 
     return $args;
 }
