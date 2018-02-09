@@ -141,18 +141,14 @@ sub bibliographic_level {
 
 sub form_of_item {
     my ($record) = @_;
-
-    return substr($record->field('008')->data(), 23, 1);
+    my $field = $record->field('008');
+    return defined $field ? substr($field->data(), 23, 1) : ' ';
 }
 
 sub is_dbas {
     my ($record) = @_;
-
-    if (defined $record->subfield('042', "9") && $record->subfield('042', "9") eq 'DBAS') {
-        return 1;
-    } else {
-        return 0;
-    }
+    my $data = $record->subfield('042', "9");
+    return defined $data && $data eq 'DBAS';
 }
 
 
