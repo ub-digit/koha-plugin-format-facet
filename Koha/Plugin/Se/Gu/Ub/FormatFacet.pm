@@ -24,14 +24,14 @@ use Koha::BiblioUtils;
 use Switch;
 
 ## Here we set our plugin version
-our $VERSION = "1.1.0";
+our $VERSION = "1.1.1";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
     name            => 'Format Facet Plugin',
     author          => 'Johan Andersson von Geijer',
     date_authored   => '2017-11-07',
-    date_updated    => "2017-12-28",
+    date_updated    => "2018-02-19",
     minimum_version => '17.06.00.028',
     maximum_version => undef,
     version         => $VERSION,
@@ -65,35 +65,7 @@ sub update_index_before {
     my $records = $args->{'records'};
 
     foreach my $record (@{$records}) {
-        my $format_footprint = format_footprint($record);
-        my $format = '';
-
-        switch ($format_footprint) {
-            case 'aa ' { $format = 'book'; }
-            case 'aao' { $format = 'ebook'; }
-            case 'aas' { $format = 'ebook'; }
-            case 'ac ' { $format = 'book'; }
-            case 'aco' { $format = 'ebook'; }
-            case 'acs' { $format = 'ebook'; }
-            case 'ad ' { $format = 'book'; }
-            case 'ado' { $format = 'ebook'; }
-            case 'ads' { $format = 'ebook'; }
-            case 'am ' { $format = 'book'; }
-            case 'amo' { $format = 'ebook'; }
-            case 'ams' { $format = 'ebook'; }
-            case 'as ' { $format = 'journal'; }
-            case 'aso' { $format = 'ejournal'; }
-            case 'ass' { $format = 'ejournal'; }
-            case 'g  ' { $format = 'movie'; }
-            case 'j  ' { $format = 'musicrecording'; }
-            case 'i  ' { $format = 'otherrecording'; }
-            case 'cm ' { $format = 'notatedmusic'; }
-            case 'dm ' { $format = 'notatedmusic'; }
-            case 'ai ' { $format = 'database'; }
-            case 'ki ' { $format = 'database'; }
-            case 'm  ' { $format = 'eresource'; }
-            else { $format = 'other'; }
-        }
+        my $format_label = get_format_label($record);
 
         my $marc_field =  $self->retrieve_data('marc_field');
         my $marc_subfield =  $self->retrieve_data('marc_subfield');
@@ -103,7 +75,7 @@ sub update_index_before {
         } else {
             #print "Using marc field $marc_field#$marc_subfield!\n";
             my $before_field = $record->field('999');
-            my $new_field = MARC::Field->new($marc_field,'','',$marc_subfield => "$format");
+            my $new_field = MARC::Field->new($marc_field,'','',$marc_subfield => "$format_label");
             $record->insert_fields_before($before_field,$new_field);
         }
     }
@@ -116,15 +88,72 @@ sub update_index_before {
     return $args;
 }
 
-sub format_footprint {
+sub get_format_label {
     my ($record) = @_;
+    my $format_label = '';
     my $leader = $record->leader();
 
-    my $footprint .= type_of_record($leader);
-    $footprint.= bibliographic_level($leader);
-    $footprint .= form_of_item($record);
+    my $type_of_record = type_of_record($leader);
+    my $bibliographic_level = bibliographic_level($leader);
+    print "Footprint:[$type_of_record$bibliographic_level";
 
-    return "$footprint";
+    switch ($type_of_record) {
+        case 'a' {
+            switch ($bibliographic_level) {
+                my $form_of_item = form_of_item($record);
+                print "$form_of_item";
+                case 'a' {
+                    $format_label = ((($form_of_item eq 's') || ($form_of_item eq 'o')) ? 'ebook' : 'book');
+                }
+                case 'c' {
+                    $format_label = ((($form_of_item eq 's') || ($form_of_item eq 'o')) ? 'ebook' : 'book');
+                }
+                case 'd' {
+                    $format_label = ((($form_of_item eq 's') || ($form_of_item eq 'o')) ? 'ebook' : 'book');
+                }
+                case 'm' {
+                    $format_label = ((($form_of_item eq 's') || ($form_of_item eq 'o')) ? 'ebook' : 'book');
+                }
+                case 's' {
+                    $format_label = ((($form_of_item eq 's') || ($form_of_item eq 'o')) ? 'ejournal' : 'journal');
+                }
+                case 'i' {
+                    $format_label = (is_dbas($record) ? 'database' : 'other');
+                }
+                else {
+                    $format_label = 'other';
+                }
+            }
+        }
+        case 'k' {
+            switch ($bibliographic_level) {
+                case 'i' {
+                    $format_label = (is_dbas($record) ? 'database' : 'other');
+                }
+                else {
+                    $format_label = 'other';
+                }
+            }
+        }
+        case 'g' { $format_label = 'movie'; }
+        case 'j' { $format_label = 'musicrecording'; }
+        case 'i' { $format_label = 'otherrecording'; }
+        case 'm' { $format_label = 'eresource'; }
+        case 'c' {
+            $format_label = (($bibliographic_level eq 'm') ? 'notatedmusic' : 'other' );
+        }
+        case 'd' {
+            $format_label = (($bibliographic_level eq 'm') ? 'notatedmusic' : 'other' );
+        }
+        else {
+            $format_label = 'other';
+        }
+    }
+
+    # print "Footprint:[$type_of_record$bibliographic_level$form_of_item] ";
+    print "] ";
+    print "Format label:[$format_label]\n\n";
+    return "$format_label";
 }
 
 sub type_of_record {
