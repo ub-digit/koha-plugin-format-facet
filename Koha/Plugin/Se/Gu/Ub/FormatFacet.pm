@@ -80,11 +80,6 @@ sub update_index_before {
         }
     }
 
-    # use Data::Dumper;
-    # open(DEBUG, '>/var/tmp/format_facet.log');
-    # print DEBUG Dumper($args);
-    # close(DEBUG);
-
     return $args;
 }
 
@@ -95,65 +90,56 @@ sub get_format_label {
 
     my $type_of_record = type_of_record($leader);
     my $bibliographic_level = bibliographic_level($leader);
-    print "Footprint:[$type_of_record$bibliographic_level";
 
     switch ($type_of_record) {
         case 'a' {
             switch ($bibliographic_level) {
                 my $form_of_item = form_of_item($record);
-                print "$form_of_item";
+
                 case 'a' {
-                    $format_label = ((($form_of_item eq 's') || ($form_of_item eq 'o')) ? 'ebook' : 'book');
+                    $format_label = (is_electronic($form_of_item) ? 'ebook' : 'book');
                 }
                 case 'c' {
-                    $format_label = ((($form_of_item eq 's') || ($form_of_item eq 'o')) ? 'ebook' : 'book');
+                    $format_label = (is_electronic($form_of_item) ? 'ebook' : 'book');
                 }
                 case 'd' {
-                    $format_label = ((($form_of_item eq 's') || ($form_of_item eq 'o')) ? 'ebook' : 'book');
+                    $format_label = (is_electronic($form_of_item) ? 'ebook' : 'book');
                 }
                 case 'm' {
-                    $format_label = ((($form_of_item eq 's') || ($form_of_item eq 'o')) ? 'ebook' : 'book');
+                    $format_label = (is_electronic($form_of_item) ? 'ebook' : 'book');
                 }
                 case 's' {
-                    $format_label = ((($form_of_item eq 's') || ($form_of_item eq 'o')) ? 'ejournal' : 'journal');
+                    $format_label = (is_electronic($form_of_item) ? 'ejournal' : 'journal');
                 }
                 case 'i' {
-                    $format_label = (is_dbas($record) ? 'database' : 'other');
-                }
-                else {
-                    $format_label = 'other';
+                    $format_label = 'database' if is_dbas($record);
                 }
             }
         }
         case 'k' {
-            switch ($bibliographic_level) {
-                case 'i' {
-                    $format_label = (is_dbas($record) ? 'database' : 'other');
-                }
-                else {
-                    $format_label = 'other';
-                }
-            }
+            $format_label = 'database' if ($bibliographic_level eq 'i') && is_dbas($record);
         }
         case 'g' { $format_label = 'movie'; }
         case 'j' { $format_label = 'musicrecording'; }
         case 'i' { $format_label = 'otherrecording'; }
         case 'm' { $format_label = 'eresource'; }
         case 'c' {
-            $format_label = (($bibliographic_level eq 'm') ? 'notatedmusic' : 'other' );
+            $format_label = 'notatedmusic' if ($bibliographic_level eq 'm');
         }
         case 'd' {
-            $format_label = (($bibliographic_level eq 'm') ? 'notatedmusic' : 'other' );
-        }
-        else {
-            $format_label = 'other';
+            $format_label = 'notatedmusic' if ($bibliographic_level eq 'm');
         }
     }
 
-    # print "Footprint:[$type_of_record$bibliographic_level$form_of_item] ";
-    print "] ";
-    print "Format label:[$format_label]\n\n";
+    $format_label = 'other' if ($format_label eq '');
+
     return "$format_label";
+}
+
+sub is_electronic {
+    my ($form_of_item) = @_;
+
+    return ($form_of_item eq 's') || ($form_of_item eq 'o');
 }
 
 sub type_of_record {
