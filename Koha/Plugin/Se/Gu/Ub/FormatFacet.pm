@@ -24,7 +24,7 @@ use Koha::BiblioUtils;
 use Switch;
 
 ## Here we set our plugin version
-our $VERSION = "1.1.2";
+our $VERSION = "1.1.3";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {

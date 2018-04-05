@@ -6,6 +6,12 @@ according to the requirements of the
 Gothenburg University Library. Use it at your own risk and make sure to modify
 it according to the needs of Your own Library or organization.
 
+## Dependencies
+The plugin is only useful in __Koha__ in combination with the __ElasticSearch__
+search engine. It also depends on the __gub-plugin-extender__
+code of Gothenburg University library. Furthermore it will need a hook called
+__update_index_before__ in order to run automatically before the indexer runs.
+
 ## Notes about the fields that are analyzed
 - leader position 06 (seventh), __type of record__
 - leader postition 07 (eighth) __bibliographic level__
