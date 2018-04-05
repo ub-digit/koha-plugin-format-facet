@@ -10,8 +10,8 @@
 
 <div id="doc3">
     <!-- We can access our own plugins resource files using the PLUGIN_PATH variable. -->
-    <img src="[% PLUGIN_PATH %]/logo.png" />
-    <h3>Koha: Get-print-data Plugin: Configuration</h3>
+    <!-- img src="[% PLUGIN_PATH %]/logo.png" -->
+    <h3>Koha: Format Facet Plugin: Configuration</h3>
 
     <!-- Notice our form here has no 'action', this is good, it means that our forms will always get passed back to 'plugins/run.pl'. You could hard code it instead if you prefer -->
     <form method="get">

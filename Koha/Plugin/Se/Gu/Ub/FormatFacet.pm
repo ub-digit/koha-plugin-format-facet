@@ -24,14 +24,14 @@ use Koha::BiblioUtils;
 use Switch;
 
 ## Here we set our plugin version
-our $VERSION = "1.1.1";
+our $VERSION = "1.1.2";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
     name            => 'Format Facet Plugin',
     author          => 'Johan Andersson von Geijer',
     date_authored   => '2017-11-07',
-    date_updated    => "2018-02-19",
+    date_updated    => "2018-04-05",
     minimum_version => '17.06.00.028',
     maximum_version => undef,
     version         => $VERSION,
