@@ -24,15 +24,15 @@ use Koha::BiblioUtils;
 use Switch;
 
 ## Here we set our plugin version
-our $VERSION = "1.1.3";
+our $VERSION = "2.0.0";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
     name            => 'Format Facet Plugin',
     author          => 'Johan Andersson von Geijer',
     date_authored   => '2017-11-07',
-    date_updated    => "2018-04-05",
-    minimum_version => '17.06.00.028',
+    date_updated    => "2022-10-05",
+    minimum_version => '22.05',
     maximum_version => undef,
     version         => $VERSION,
     description     => 'This plugin combines several marc fields and subfields '
@@ -59,10 +59,17 @@ sub new {
     return $self;
 }
 
-sub update_index_before {
-    my ($self, $args) = @_;
-    my $biblionums = $args->{'biblionums'};
-    my $records = $args->{'records'};
+sub before_index_action {
+    my ($self, $params) = @_;
+    my $action = $params->{action};
+    my $payload = $params->{payload};
+    my $engine = $payload->{engine};
+
+    if($action ne "update" || $engine ne "Elasticsearch") {
+        return;
+    }
+
+    my $records = $payload->{records};
 
     foreach my $record (@{$records}) {
         my $format_label = get_format_label($record);
@@ -79,8 +86,6 @@ sub update_index_before {
             $record->insert_fields_before($before_field,$new_field);
         }
     }
-
-    return $args;
 }
 
 sub get_format_label {
